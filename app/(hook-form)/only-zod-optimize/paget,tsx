@@ -1,0 +1,142 @@
+"use client";
+
+import { useState } from "react";
+import { z } from "zod";
+import { useFormHandlers } from "./formHandlers"; // Import the custom hook
+import InputField from "./InputField";
+import SelectField from "./SelectField";
+import CheckboxField from "./CheckboxField";
+import RadioGroup from "./RadioGroup";
+import ImageUpload from "./ImageUpload";
+import MultiCheckboxGroup from "./MultiCheckboxGroup";
+import { formSchema } from "./validation/validation";
+
+;
+
+const OnlyZod = () => {
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  type FormData = z.infer<typeof formSchema>;
+
+  const initialFormData: FormData = {
+    name: "",
+    email: "",
+    age: undefined,
+    dateOfBirth: "",
+    country: "",
+    gender: "male",
+    password: "",
+    confirmPassword: "",
+    image: null,
+    terms: false,
+    interests: [],
+  };
+
+  const [formData, setFormData] = useState<FormData>(initialFormData);
+
+  const { handleChange, handleImageChange, handleSubmit } = useFormHandlers(
+    formData,
+    setErrors,
+    setFormData
+  );
+
+  const handleImageChangeWrapper = (file: File | null) => {
+    const imageUrl = handleImageChange(file);
+    setImagePreview(imageUrl);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+      <div className="w-full max-w-lg bg-white shadow-md rounded-lg p-8">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-3">Register</h2>
+        <form
+          className="space-y-3"
+          onSubmit={(e) => handleSubmit(e, formData)}
+        >
+          <InputField
+            label="Name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            error={errors.name}
+          />
+          <InputField
+            label="Email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            error={errors.email}
+          />
+          <InputField
+            label="Age"
+            name="age"
+            type="number"
+            value={formData.age ?? ""}
+            onChange={handleChange}
+            error={errors.age}
+          />
+          <InputField
+            label="Date of Birth"
+            name="dateOfBirth"
+            type="date"
+            value={formData.dateOfBirth}
+            onChange={handleChange}
+            error={errors.dateOfBirth}
+          />
+          <SelectField
+            label="Country"
+            name="country"
+            value={formData.country}
+            onChange={handleChange}
+            error={errors.country}
+            options={[
+              { value: "", label: "Select your country" },
+              { value: "US", label: "United States" },
+              { value: "BD", label: "Bangladesh" },
+              { value: "IN", label: "India" },
+              { value: "UK", label: "United Kingdom" },
+            ]}
+          />
+          <MultiCheckboxGroup
+            label="Interests"
+            options={["sports", "music", "art", "technology"]}
+            selectedValues={formData.interests}
+            onChange={(checkedInterests) => {
+              setFormData((prevData) => ({ ...prevData, interests: checkedInterests }));
+              validateField("interests", checkedInterests);
+            }}
+          />
+          <CheckboxField
+            label="I accept the terms and conditions"
+            name="terms"
+            checked={formData.terms}
+            onChange={handleChange}
+            error={errors.terms}
+          />
+          <RadioGroup
+            label="Gender"
+            name="gender"
+            options={["male", "female", "other"]}
+            selectedValue={formData.gender}
+            onChange={handleChange}
+          />
+          <ImageUpload
+            onChange={handleImageChangeWrapper}
+            error={errors.image}
+            imagePreview={imagePreview}
+          />
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-500 transition duration-200"
+          >
+            Submit
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default OnlyZod;
