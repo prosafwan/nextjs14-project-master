@@ -1,6 +1,7 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { api } from "./services/api";
+import { configureStore } from '@reduxjs/toolkit';
+import { api } from '../services/api';
 
+// Configure the Redux store
 export const store = configureStore({
   reducer: {
     [api.reducerPath]: api.reducer,
@@ -11,4 +12,3 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-
